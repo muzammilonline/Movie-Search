@@ -2,6 +2,7 @@ import React from 'react';
 import Spinner from './components/Spinner.jsx';
 import { useState, useEffect } from 'react';
 import Search from './components/Search.jsx';
+import MovieCard from './components/MovieCard.jsx';
 
 const API_BASE_URL = 'https://api.themoviedb.org/3';
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
@@ -20,12 +21,13 @@ const App = () => {
   const [movieList, setMovieList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const fetchMovies = async () => {
+  const fetchMovies = async (query='') => {
     try {
       setIsLoading(true);
       setErrorMessage('');
 
-      const endpoint = `${API_BASE_URL}/discover/movie?sort_by=popularity.desc`;
+      const endpoint = query? `${API_BASE_URL}/search/movie?query=${encodeURIComponent(query)}`:
+      `${API_BASE_URL}/discover/movie?sort_by=popularity.desc`;
       const response = await fetch(endpoint, API_OPTIONS);
 
       if (!response.ok) {
@@ -35,8 +37,8 @@ const App = () => {
       const data = await response.json();
       console.log(data);
 
-      // ✅ തെറ്റായ response.data ചെക്ക് ഒഴിവാക്കി നേരിട്ട് results നൽകി
       setMovieList(data.results || []);
+           console.log("My API Key is:", API_KEY);
     } catch (err) {
       console.error(`Error fetching movies: ${err}`);
       setErrorMessage('Error fetching movies, Please try again later');
@@ -46,8 +48,8 @@ const App = () => {
   };
 
   useEffect(() => {
-    fetchMovies();
-  }, []);
+    fetchMovies(searchTerm);
+  }, [searchTerm]);
 
   return (
     <main>
@@ -70,14 +72,9 @@ const App = () => {
             ) : (
               <ul>
                 {movieList.map((movie) => (
-                  // ✅ key ഉം li ടാഗും ശരിയായ രീതിയിൽ ചേർത്തു
-                  <li key={movie.id} className="text-white">
-                    {movie.title}
-                  </li>
-                ))}
-              </ul>
+                 <MovieCard key={movie.id} movie={movie} />        ))}
+       </ul>
             )}
-            console.log("My API Key is:", API_KEY);
           </section>
         </div>
       </div>
